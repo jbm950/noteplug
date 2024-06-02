@@ -50,28 +50,37 @@ class DashboardScreen:
             selection = self._project_list[self.project_list_buffer.document.cursor_position_row]
             top_app.switch_to_kanban(selection)
 
-        initial_doc = Document(text="\n".join(self._format_project_list()), cursor_position=0)
+        initial_doc = Document(text=self._format_project_list(), cursor_position=0)
         self.project_list_buffer = Buffer(document=initial_doc, read_only=True)
         self.layout = Layout(Frame(Window(content=BufferControl(self.project_list_buffer,
                                                                 input_processors=[FormatText()],
                                                                 key_bindings=proj_list_kb))))
 
     def _format_project_list(self):
-        return [f"<ansiwhite>{project}</ansiwhite>" for project in self._project_list]
+        return "\n".join([f"<ansiwhite>{project}</ansiwhite>" for project in self._project_list])
 
 
 class KanbanScreen:
     def __init__(self):
+        backlog_tasks = ["task 1"]
+        active_tasks = ["task 2", "task 3"]
+        completed_tasks = ["task 4", "task 5"]
+
         self.layout = Layout(
-            VSplit([Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+            VSplit([Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(backlog_tasks)))),
                           title="Backlog"),
-                    Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+                    Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(active_tasks)))),
                           title="Active"),
-                    Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+                    Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(completed_tasks)))),
                           title="Completed")]))
 
     def update(self, project):
         pass
+
+    @staticmethod
+    def format_task_column(tasks):
+        return "\n".join([f"<ansiwhite>{task}</ansiwhite>" for task in tasks])
+
 
 
 class FormatText(Processor):
