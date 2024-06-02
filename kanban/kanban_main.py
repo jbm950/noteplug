@@ -14,16 +14,25 @@ from prompt_toolkit.layout.processors import Processor, Transformation
 from prompt_toolkit.widgets import Frame
 
 # GET DATA
+class Task:
+    def __init__(self, file_path, projects=None):
+        self.file_path = file_path
+        self.projects: list = projects
+
+class TaskList(list):
+    pass
 
 # Probably need a check that Notes Dir exists as an environment variable
 NOTES_DIR = pathlib.Path(os.environ["NOTES_DIR"])
 PROD_DIR = NOTES_DIR.joinpath("Productivity")
 
+task_list = TaskList()
 data = {}
 for markdown_file_path in PROD_DIR.rglob("*.md"):
     with open(markdown_file_path) as markdown_file:
         first_line = markdown_file.readline()
         if first_line != "---\n":
+            task_list.append(Task(markdown_file_path))
             continue
 
         yaml_list = []
@@ -33,11 +42,14 @@ for markdown_file_path in PROD_DIR.rglob("*.md"):
             yaml_list.append(next_line)
 
     yaml_string = "\n".join(yaml_list)
+    yaml_dict = yaml.load(yaml_string, Loader=yaml.Loader)
+
+    task_list.append(Task(markdown_file_path, projects=yaml_dict["projects"]))
     data[markdown_file_path] = yaml.load(yaml_string, Loader=yaml.Loader)
 
 projects_set = set()
-for item in data.values():
-    projects = item.get("projects", None)
+for item in task_list:
+    projects = item.projects
     if projects is not None:
         for project in projects:
             projects_set.add(project)
