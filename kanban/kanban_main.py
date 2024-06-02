@@ -1,7 +1,3 @@
-import os
-import pathlib
-import yaml
-
 from prompt_toolkit import Application
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
@@ -13,30 +9,10 @@ from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.layout.processors import Processor, Transformation
 from prompt_toolkit.widgets import Frame
 
-from constants import PROD_DIR
-from model import Task, TaskList
+from load_tasks import load_tasks
 
 # GET DATA
-task_list = TaskList()
-data = {}
-for markdown_file_path in PROD_DIR.rglob("*.md"):
-    with open(markdown_file_path) as markdown_file:
-        first_line = markdown_file.readline()
-        if first_line != "---\n":
-            task_list.append(Task(markdown_file_path))
-            continue
-
-        yaml_list = []
-        for next_line in markdown_file.readlines():
-            if next_line == "---\n":
-                break
-            yaml_list.append(next_line)
-
-    yaml_string = "\n".join(yaml_list)
-    yaml_dict = yaml.load(yaml_string, Loader=yaml.Loader)
-
-    task_list.append(Task(markdown_file_path, projects=yaml_dict["projects"]))
-    data[markdown_file_path] = yaml.load(yaml_string, Loader=yaml.Loader)
+task_list = load_tasks()
 
 projects_set = set()
 for item in task_list:
