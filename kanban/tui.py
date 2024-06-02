@@ -12,7 +12,7 @@ from prompt_toolkit.widgets import Frame
 
 class App:
     def __init__(self, task_list):
-        self.dashboard_screen = DashboardScreen(task_list)
+        self.dashboard_screen = DashboardScreen(task_list, self)
         self.kanban_screen = KanbanScreen()
 
         kb = KeyBindings()
@@ -37,17 +37,31 @@ class App:
     def run(self):
         self.app.run()
 
+    def switch_to_kanban(self, project):
+        self.kanban_screen.update(project)
+        self.app.layout = self.kanban_screen.layout
+
 
 class DashboardScreen:
-    def __init__(self, task_list):
+    def __init__(self, task_list, top_app):
         self._task_list = task_list
+        self._project_list = task_list.projects
+
+        proj_list_kb = KeyBindings()
+
+        @proj_list_kb.add('enter')
+        def enter_(event):
+            selection = self._project_list[self.project_list_buffer.document.cursor_position_row]
+            top_app.switch_to_kanban(selection)
 
         initial_doc = Document(text="\n".join(self._format_project_list()), cursor_position=0)
         self.project_list_buffer = Buffer(document=initial_doc, read_only=True)
-        self.layout = Layout(Frame(Window(content=BufferControl(self.project_list_buffer, input_processors=[FormatText()]))))
+        self.layout = Layout(Frame(Window(content=BufferControl(self.project_list_buffer,
+                                                                input_processors=[FormatText()],
+                                                                key_bindings=proj_list_kb))))
 
     def _format_project_list(self):
-        return [f"<ansiwhite>{project}</ansiwhite>" for project in self._task_list.projects]
+        return [f"<ansiwhite>{project}</ansiwhite>" for project in self._project_list]
 
 
 class KanbanScreen:
@@ -59,6 +73,9 @@ class KanbanScreen:
                           title="Active"),
                     Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
                           title="Completed")]))
+
+    def update(self, project):
+        pass
 
 
 class FormatText(Processor):
