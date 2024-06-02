@@ -22,12 +22,8 @@ class App:
             event.app.reset()
             event.app.exit()
 
-        @kb.add('2')
-        def kanban_screen_(event):
-            event.app.layout = self.kanban_screen.layout
-
-        @kb.add('1')
-        def dashboard_screen_(event):
+        @kb.add('escape')
+        def switch_to_dashboard_(event):
             event.app.layout = self.dashboard_screen.layout
 
         self.app = Application(layout=self.dashboard_screen.layout,
