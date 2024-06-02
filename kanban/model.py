@@ -12,4 +12,13 @@ class Task:
 
 
 class TaskList(list):
-    pass
+    @property
+    def projects(self):
+        projects_set = set()
+        for task in self:
+            projects = task.projects
+            if projects is not None:
+                for project in projects:
+                    projects_set.add(project)
+
+        return sorted(list(projects_set))

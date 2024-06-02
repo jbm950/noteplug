@@ -14,14 +14,6 @@ from load_tasks import load_tasks
 # GET DATA
 task_list = load_tasks()
 
-projects_set = set()
-for item in task_list:
-    projects = item.projects
-    if projects is not None:
-        for project in projects:
-            projects_set.add(project)
-
-projects_list = sorted(list(projects_set))
 
 # TUI
 class FormatText(Processor):
@@ -29,7 +21,8 @@ class FormatText(Processor):
         fragments = to_formatted_text(HTML(fragment_list_to_text(transformation_input.fragments)))
         return Transformation(fragments)
 
-wrapped_list = [f"<ansiwhite>{project}</ansiwhite>" for project in projects_list]
+
+wrapped_list = [f"<ansiwhite>{project}</ansiwhite>" for project in task_list.projects]
 
 initial_doc = Document(text="\n".join(wrapped_list), cursor_position=0)
 buffer1 = Buffer(document=initial_doc, read_only=True)
