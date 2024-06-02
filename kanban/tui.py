@@ -12,19 +12,8 @@ from prompt_toolkit.widgets import Frame
 
 class App:
     def __init__(self, task_list):
-        wrapped_list = [f"<ansiwhite>{project}</ansiwhite>" for project in task_list.projects]
-
-        initial_doc = Document(text="\n".join(wrapped_list), cursor_position=0)
-        buffer1 = Buffer(document=initial_doc, read_only=True)
-        screen1 = Layout(Frame(Window(content=BufferControl(buffer1, input_processors=[FormatText()]))))
-
-        screen2 = Layout(
-            VSplit([Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
-                        title="Backlog"),
-                Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
-                        title="Active"),
-                    Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
-                        title="Completed")]))
+        self.dashboard_screen = DashboardScreen(task_list)
+        self.kanban_screen = KanbanScreen()
 
         kb = KeyBindings()
 
@@ -34,17 +23,42 @@ class App:
             event.app.exit()
 
         @kb.add('2')
-        def screen2_(event):
-            event.app.layout = screen2
+        def kanban_screen_(event):
+            event.app.layout = self.kanban_screen.layout
 
         @kb.add('1')
-        def screen2_(event):
-            event.app.layout = screen1
+        def dashboard_screen_(event):
+            event.app.layout = self.dashboard_screen.layout
 
-        self.app = Application(layout=screen1, key_bindings=kb, full_screen=True)
+        self.app = Application(layout=self.dashboard_screen.layout,
+                               key_bindings=kb,
+                               full_screen=True)
 
     def run(self):
         self.app.run()
+
+
+class DashboardScreen:
+    def __init__(self, task_list):
+        self._task_list = task_list
+
+        initial_doc = Document(text="\n".join(self._format_project_list()), cursor_position=0)
+        self.project_list_buffer = Buffer(document=initial_doc, read_only=True)
+        self.layout = Layout(Frame(Window(content=BufferControl(self.project_list_buffer, input_processors=[FormatText()]))))
+
+    def _format_project_list(self):
+        return [f"<ansiwhite>{project}</ansiwhite>" for project in self._task_list.projects]
+
+
+class KanbanScreen:
+    def __init__(self):
+        self.layout = Layout(
+            VSplit([Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+                          title="Backlog"),
+                    Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+                          title="Active"),
+                    Frame(Window(content=FormattedTextControl(text=HTML("<ansiwhite>Screen 2</ansiwhite>"))),
+                          title="Completed")]))
 
 
 class FormatText(Processor):
