@@ -13,23 +13,10 @@ from prompt_toolkit.layout.layout import Layout
 from prompt_toolkit.layout.processors import Processor, Transformation
 from prompt_toolkit.widgets import Frame
 
+from constants import PROD_DIR
+from model import Task, TaskList
+
 # GET DATA
-class Task:
-    def __init__(self, file_path, projects=None):
-        self.file_path = file_path
-        # This gets the name of the first folder after "Productivity" and
-        # assume that it represents the state of the task (ex. Backlog,
-        # Completed, etc.).
-        self.state = file_path.relative_to(NOTES_DIR).parents[-3].name
-        self.projects: list = projects
-
-class TaskList(list):
-    pass
-
-# Probably need a check that Notes Dir exists as an environment variable
-NOTES_DIR = pathlib.Path(os.environ["NOTES_DIR"])
-PROD_DIR = NOTES_DIR.joinpath("Productivity")
-
 task_list = TaskList()
 data = {}
 for markdown_file_path in PROD_DIR.rglob("*.md"):
