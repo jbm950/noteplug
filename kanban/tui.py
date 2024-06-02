@@ -13,7 +13,7 @@ from prompt_toolkit.widgets import Frame
 class App:
     def __init__(self, task_list):
         self.dashboard_screen = DashboardScreen(task_list, self)
-        self.kanban_screen = KanbanScreen()
+        self.kanban_screen = KanbanScreen(task_list)
 
         kb = KeyBindings()
 
@@ -61,21 +61,29 @@ class DashboardScreen:
 
 
 class KanbanScreen:
-    def __init__(self):
-        backlog_tasks = ["task 1"]
-        active_tasks = ["task 2", "task 3"]
-        completed_tasks = ["task 4", "task 5"]
+    def __init__(self, task_list):
+        self._task_list = task_list
+
+        self._backlog_control = FormattedTextControl(text="")
+        self._active_control = FormattedTextControl(text="")
+        self._completed_control = FormattedTextControl(text="")
 
         self.layout = Layout(
-            VSplit([Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(backlog_tasks)))),
-                          title="Backlog"),
-                    Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(active_tasks)))),
-                          title="Active"),
-                    Frame(Window(content=FormattedTextControl(text=HTML(self.format_task_column(completed_tasks)))),
-                          title="Completed")]))
+            VSplit([Frame(Window(content=self._backlog_control), title="Backlog"),
+                    Frame(Window(content=self._active_control), title="Active"),
+                    Frame(Window(content=self._completed_control), title="Completed")]))
 
     def update(self, project):
-        pass
+        project_tasks = self._task_list.task_status_for_project(project)
+        self._backlog_control.text = HTML(self.format_task_column(
+            [task.name for task in project_tasks["Backlog"]]
+            ))
+        self._active_control.text = HTML(self.format_task_column(
+            [task.name for task in project_tasks["Active"]]
+            ))
+        self._completed_control.text = HTML(self.format_task_column(
+            [task.name for task in project_tasks["Completed"]]
+            ))
 
     @staticmethod
     def format_task_column(tasks):
