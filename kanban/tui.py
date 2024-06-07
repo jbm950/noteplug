@@ -55,6 +55,14 @@ class DashboardScreen:
             selection = self._project_list[self.project_list_buffer.document.cursor_position_row]
             top_app.switch_to_kanban(selection)
 
+        @proj_list_kb.add('j')
+        def cursor_down_(event):
+            event.app.layout.current_buffer.cursor_down()
+
+        @proj_list_kb.add('k')
+        def cursor_up_(event):
+            event.app.layout.current_buffer.cursor_up()
+
         initial_doc = Document(text=self._format_project_list(), cursor_position=0)
         self.project_list_buffer = Buffer(document=initial_doc, read_only=True)
         self.layout = Layout(Frame(Window(content=BufferControl(self.project_list_buffer,
