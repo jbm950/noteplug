@@ -6,6 +6,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.containers import VSplit, Window
 from prompt_toolkit.layout.controls import BufferControl, FormattedTextControl
 from prompt_toolkit.layout.layout import Layout
+from prompt_toolkit.styles import Style
 from prompt_toolkit.layout.processors import Processor, Transformation
 from prompt_toolkit.widgets import Frame
 
@@ -26,8 +27,12 @@ class App:
         def switch_to_dashboard_(event):
             event.app.layout = self.dashboard_screen.layout
 
+        style = Style.from_dict({"frame.border": '#008080',
+                                 "frame": "#ffffff"})  # Handles frame title text
+
         self.app = Application(layout=self.dashboard_screen.layout,
                                key_bindings=kb,
+                               style=style,
                                full_screen=True)
 
     def run(self):
