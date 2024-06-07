@@ -23,7 +23,7 @@ class App:
             event.app.reset()
             event.app.exit()
 
-        @kb.add('escape')
+        @kb.add('c-d')
         def switch_to_dashboard_(event):
             event.app.layout = self.dashboard_screen.layout
 
