@@ -132,7 +132,6 @@ class KanbanScreen:
         return "\n".join([f"<ansiwhite>{task}</ansiwhite>" for task in tasks])
 
 
-
 class FormatText(Processor):
     def apply_transformation(self, transformation_input):
         fragments = to_formatted_text(HTML(fragment_list_to_text(transformation_input.fragments)))
