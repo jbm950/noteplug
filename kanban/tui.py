@@ -78,15 +78,36 @@ class KanbanScreen:
     def __init__(self, task_list):
         self._task_list = task_list
 
+        column_keybinds = KeyBindings()
+
+        @column_keybinds.add("c-l")
+        def _move_column_right_(event):
+            current_col_idx = self.columns.index(event.app.layout.current_buffer)
+            if current_col_idx == len(self.columns) - 1:
+                return
+            self.layout.focus(self.columns[current_col_idx + 1])
+
+        @column_keybinds.add("c-h")
+        def _move_column_left_(event):
+            current_col_idx = self.columns.index(event.app.layout.current_buffer)
+            if current_col_idx == 0:
+                return
+            self.layout.focus(self.columns[current_col_idx - 1])
+
         self._backlog_buffer = Buffer(read_only=True)
         self.backlog_window = Window(content=BufferControl(self._backlog_buffer,
-                                                           input_processors=[FormatText()]))
+                                                           input_processors=[FormatText()],
+                                                           key_bindings=column_keybinds))
         self._active_buffer = Buffer(read_only=True)
         self.active_window = Window(content=BufferControl(self._active_buffer,
-                                                          input_processors=[FormatText()]))
+                                                          input_processors=[FormatText()],
+                                                          key_bindings=column_keybinds))
         self._completed_buffer = Buffer(read_only=True)
         self.completed_window = Window(content=BufferControl(self._completed_buffer,
-                                                             input_processors=[FormatText()]))
+                                                             input_processors=[FormatText()],
+                                                             key_bindings=column_keybinds))
+
+        self.columns = [self._backlog_buffer, self._active_buffer, self._completed_buffer]
 
         self.layout = Layout(
             VSplit([Frame(self.backlog_window, title="Backlog"),
