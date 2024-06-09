@@ -41,6 +41,7 @@ class App:
     def switch_to_kanban(self, project):
         self.kanban_screen.update(project)
         self.app.layout = self.kanban_screen.layout
+        self.kanban_screen.layout.focus(self.kanban_screen.backlog_window)
 
 
 class DashboardScreen:
@@ -77,26 +78,33 @@ class KanbanScreen:
     def __init__(self, task_list):
         self._task_list = task_list
 
-        self._backlog_control = FormattedTextControl(text="")
-        self._active_control = FormattedTextControl(text="")
-        self._completed_control = FormattedTextControl(text="")
+        self._backlog_buffer = Buffer(read_only=True)
+        self.backlog_window = Window(content=BufferControl(self._backlog_buffer,
+                                                           input_processors=[FormatText()]))
+        self._active_buffer = Buffer(read_only=True)
+        self.active_window = Window(content=BufferControl(self._active_buffer,
+                                                          input_processors=[FormatText()]))
+        self._completed_buffer = Buffer(read_only=True)
+        self.completed_window = Window(content=BufferControl(self._completed_buffer,
+                                                             input_processors=[FormatText()]))
 
         self.layout = Layout(
-            VSplit([Frame(Window(content=self._backlog_control), title="Backlog"),
-                    Frame(Window(content=self._active_control), title="Active"),
-                    Frame(Window(content=self._completed_control), title="Completed")]))
+            VSplit([Frame(self.backlog_window, title="Backlog"),
+                    Frame(self.active_window, title="Active"),
+                    Frame(self.completed_window, title="Completed")])
+            )
 
     def update(self, project):
         project_tasks = self._task_list.task_status_for_project(project)
-        self._backlog_control.text = HTML(self.format_task_column(
+        self._backlog_buffer.reset(Document(text=self.format_task_column(
             [task.name for task in project_tasks["Backlog"]]
-            ))
-        self._active_control.text = HTML(self.format_task_column(
+            ), cursor_position=0))
+        self._active_buffer.reset(Document(text=self.format_task_column(
             [task.name for task in project_tasks["Active"]]
-            ))
-        self._completed_control.text = HTML(self.format_task_column(
+            ), cursor_position=0))
+        self._completed_buffer.reset(Document(text=self.format_task_column(
             [task.name for task in project_tasks["Completed"]]
-            ))
+            ), cursor_position=0))
 
     @staticmethod
     def format_task_column(tasks):
