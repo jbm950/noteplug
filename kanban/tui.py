@@ -94,6 +94,14 @@ class KanbanScreen:
                 return
             self.layout.focus(self.columns[current_col_idx - 1])
 
+        @column_keybinds.add('j')
+        def cursor_down_(event):
+            event.app.layout.current_buffer.cursor_down()
+
+        @column_keybinds.add('k')
+        def cursor_up_(event):
+            event.app.layout.current_buffer.cursor_up()
+
         self._backlog_buffer = Buffer(read_only=True)
         self.backlog_window = Window(content=BufferControl(self._backlog_buffer,
                                                            input_processors=[FormatText()],
